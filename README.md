@@ -1,6 +1,10 @@
-# FIBO HDRI Studio Agent
+# 🎬 FIBO HDRI Studio Agent
 
-A deterministic HDRI and PBR texture generation tool using Bria's FIBO model for professional VFX and 3D workflows.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Flask](https://img.shields.io/badge/Flask-2.3+-green.svg)](https://flask.palletsprojects.com/)
+
+A professional deterministic HDRI and PBR texture generation tool for VFX and 3D workflows. Generate matched 360° HDRI environments and tileable PBR texture sets with precise lighting control.
 
 ## Overview
 
@@ -10,28 +14,44 @@ This agent generates matched HDRI environments and PBR texture sets from a singl
 - Deterministic control via EV values and lighting parameters
 - JSON-based repeatability for production workflows
 
-## Features
+## ✨ Key Features
 
-- **Deterministic Generation**: Same prompt + parameters = identical results
-- **Professional Formats**: 16-bit EXR for HDRI, 16-bit PNG/TIFF for textures
-- **Lighting Consistency**: HDRI and PBR maps share the same lighting characteristics
-- **Production Ready**: Direct integration with Blender, Unity, and other 3D tools
+- 🎯 **Deterministic Generation**: Same prompt + parameters = identical results
+- 🎨 **Professional Formats**: 16-bit EXR for HDRI, 16-bit PNG/TIFF for textures  
+- 💡 **Lighting Consistency**: HDRI and PBR maps share the same lighting characteristics
+- 🔧 **Production Ready**: Direct integration with Blender, Unity, and other 3D tools
+- 🌐 **Web Interface**: Professional UI with real-time parameter control
+- ⚡ **CLI Support**: Batch processing and automation capabilities
+- 📦 **Asset Packaging**: Organized output with complete metadata
 
-## Quick Start
+## 🚀 Quick Start
 
-1. Install dependencies:
+### Web Interface (Recommended)
 ```bash
+# 1. Install dependencies
 pip install -r requirements.txt
-```
 
-2. Run the web interface:
-```bash
+# 2. Start the web server
 python app.py
+
+# 3. Open browser to http://localhost:5000
 ```
 
-3. Or use the CLI:
+### CLI Interface
 ```bash
-python generate.py --prompt "rough roman cobblestone street" --ev 12.0 --azimuth 180
+# Generate complete asset package
+python generate.py \
+  --prompt "rough roman cobblestone street" \
+  --ev-value 12.0 \
+  --azimuth 180 \
+  --texture-types albedo normal roughness \
+  --package
+```
+
+### Demo Mode
+```bash
+# Run interactive demonstration
+python demo.py
 ```
 
 ## Project Structure
