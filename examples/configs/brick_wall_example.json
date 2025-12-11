@@ -1,0 +1,26 @@
+{
+  "prompt": "weathered red brick wall",
+  "ev_value": 10.5,
+  "azimuth": 225.0,
+  "color_profile": "sRGB",
+  "seed": 1337,
+  "steps": 50,
+  "guidance_scale": 7.5,
+  "negative_prompt": "low quality, blurry, distorted",
+  "width": 1024,
+  "height": 1024,
+  "metadata": {
+    "version": "1.0",
+    "generator": "FIBO-HDRI-Studio",
+    "lighting": {
+      "ev_value": 10.5,
+      "azimuth": 225.0,
+      "elevation": 45.0
+    },
+    "color": {
+      "profile": "sRGB",
+      "bit_depth": 16,
+      "gamma": 2.2
+    }
+  }
+}

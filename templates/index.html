@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIBO HDRI Studio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .card-custom {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .btn-custom {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 30px;
+        }
+        .slider-container {
+            margin: 20px 0;
+        }
+        .preview-container {
+            min-height: 200px;
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .generation-status {
+            display: none;
+        }
+        .progress-custom {
+            height: 8px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg gradient-bg">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="fas fa-cube me-2"></i>FIBO HDRI Studio
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text">
+                    Professional HDRI & PBR Generation
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Main Interface -->
+        <div class="row">
+            <!-- Control Panel -->
+            <div class="col-lg-4">
+                <div class="card card-custom">
+                    <div class="card-header gradient-bg">
+                        <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Generation Controls</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="generationForm">
+                            <!-- Prompt Input -->
+                            <div class="mb-3">
+                                <label for="prompt" class="form-label fw-bold">Scene Description</label>
+                                <textarea class="form-control" id="prompt" rows="3" 
+                                         placeholder="e.g., rough roman cobblestone street, weathered brick wall, wooden planks..."></textarea>
+                                <div class="form-text">Describe the material or environment you want to generate</div>
+                            </div>
+
+                            <!-- EV Value Slider -->
+                            <div class="slider-container">
+                                <label for="evValue" class="form-label fw-bold">
+                                    Exposure Value (EV): <span id="evValueDisplay">12.0</span>
+                                </label>
+                                <input type="range" class="form-range" id="evValue" 
+                                       min="8.0" max="15.0" step="0.1" value="12.0">
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-muted">Dark/Moody</small>
+                                    <small class="text-muted">Bright/Sunny</small>
+                                </div>
+                            </div>
+
+                            <!-- Azimuth Slider -->
+                            <div class="slider-container">
+                                <label for="azimuth" class="form-label fw-bold">
+                                    Light Direction: <span id="azimuthDisplay">180°</span>
+                                </label>
+                                <input type="range" class="form-range" id="azimuth" 
+                                       min="0" max="360" step="1" value="180">
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-muted">0° (North)</small>
+                                    <small class="text-muted">180° (South)</small>
+                                </div>
+                            </div>
+
+                            <!-- Color Profile -->
+                            <div class="mb-3">
+                                <label for="colorProfile" class="form-label fw-bold">Color Profile</label>
+                                <select class="form-select" id="colorProfile">
+                                    <option value="sRGB" selected>sRGB (Standard)</option>
+                                    <option value="ACEScg">ACEScg (VFX)</option>
+                                    <option value="Rec.2020">Rec.2020 (HDR)</option>
+                                    <option value="DCI-P3">DCI-P3 (Cinema)</option>
+                                </select>
+                            </div>
+
+                            <!-- Generation Options -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Generate</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="generateHdri" checked>
+                                    <label class="form-check-label" for="generateHdri">
+                                        360° HDRI Environment
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="generateTextures" checked>
+                                    <label class="form-check-label" for="generateTextures">
+                                        PBR Texture Maps
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Texture Types -->
+                            <div class="mb-3" id="textureOptions">
+                                <label class="form-label fw-bold">Texture Types</label>
+                                <div class="form-check">
+                                    <input class="form-check-input texture-type" type="checkbox" value="albedo" checked>
+                                    <label class="form-check-label">Albedo (Base Color)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input texture-type" type="checkbox" value="normal" checked>
+                                    <label class="form-check-label">Normal Map</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input texture-type" type="checkbox" value="roughness" checked>
+                                    <label class="form-check-label">Roughness Map</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input texture-type" type="checkbox" value="ao">
+                                    <label class="form-check-label">Ambient Occlusion</label>
+                                </div>
+                            </div>
+
+                            <!-- Preset Buttons -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Quick Presets</label>
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-outline-primary btn-sm preset-btn" 
+                                            data-preset="sunny_day">☀️ Sunny Day</button>
+                                    <button type="button" class="btn btn-outline-warning btn-sm preset-btn" 
+                                            data-preset="golden_hour">🌅 Golden Hour</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm preset-btn" 
+                                            data-preset="overcast">☁️ Overcast</button>
+                                    <button type="button" class="btn btn-outline-dark btn-sm preset-btn" 
+                                            data-preset="dramatic">🎭 Dramatic</button>
+                                </div>
+                            </div>
+
+                            <!-- Generate Button -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-custom btn-lg text-white">
+                                    <i class="fas fa-magic me-2"></i>Generate Assets
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="col-lg-8">
+                <!-- Status Card -->
+                <div class="card card-custom mb-4 generation-status" id="statusCard">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border text-primary me-3" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Generating Assets...</h6>
+                                <p class="mb-0 text-muted" id="statusText">Initializing FIBO model...</p>
+                            </div>
+                        </div>
+                        <div class="progress progress-custom mt-3">
+                            <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Grid -->
+                <div class="row" id="resultsGrid">
+                    <!-- HDRI Preview -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card card-custom">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-globe me-2"></i>HDRI Environment</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="preview-container" id="hdriPreview">
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-image fa-3x mb-2"></i>
+                                        <p>HDRI will appear here</p>
+                                    </div>
+                                </div>
+                                <div class="mt-3 d-none" id="hdriDownload">
+                                    <button class="btn btn-success btn-sm download-btn" data-type="hdri">
+                                        <i class="fas fa-download me-1"></i>Download HDRI
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Texture Previews -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card card-custom">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-layer-group me-2"></i>PBR Textures</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="preview-container" id="texturePreview">
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-th fa-3x mb-2"></i>
+                                        <p>Textures will appear here</p>
+                                    </div>
+                                </div>
+                                <div class="mt-3 d-none" id="textureDownloads">
+                                    <!-- Texture download buttons will be added here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Package Download -->
+                <div class="card card-custom d-none" id="packageCard">
+                    <div class="card-body text-center">
+                        <h5><i class="fas fa-box me-2"></i>Complete Asset Package</h5>
+                        <p class="text-muted">Download all generated assets in a single package</p>
+                        <button class="btn btn-custom text-white download-btn" data-type="package">
+                            <i class="fas fa-download me-2"></i>Download Package
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
