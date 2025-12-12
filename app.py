@@ -21,8 +21,8 @@ logging.basicConfig(
 def main():
     """Main application entry point"""
     try:
-        # Initialize web UI
-        web_ui = WebUI()
+        # Initialize web UI with Stable Diffusion model
+        web_ui = WebUI("runwayml/stable-diffusion-v1-5")
         
         # Run the application
         web_ui.run(host='0.0.0.0', port=5000, debug=False)

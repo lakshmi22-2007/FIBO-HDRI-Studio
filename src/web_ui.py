@@ -10,14 +10,20 @@ import logging
 from pathlib import Path
 from typing import Dict, Any
 
-# Import components (will be mocked for demo)
+# Import components
 try:
-    from .fibo_agent import FIBOAgent
+    from .simple_generator import SimpleGenerator
     from .parameter_handler import ParameterHandler
     from .post_processor import PostProcessor
+    SIMPLE_MODE = True
+except ImportError:
+    SIMPLE_MODE = False
+
+# Try to import full ML functionality
+try:
+    from .fibo_agent import FIBOAgent
     FULL_FUNCTIONALITY = True
 except ImportError:
-    # Mock classes for demo mode
     FULL_FUNCTIONALITY = False
 
 logger = logging.getLogger(__name__)
@@ -25,22 +31,31 @@ logger = logging.getLogger(__name__)
 class WebUI:
     """Flask web interface for FIBO HDRI Studio"""
     
-    def __init__(self, model_path: str = "briaai/BRIA-2.3"):
+    def __init__(self, model_path: str = "runwayml/stable-diffusion-v1-5"):
         self.app = Flask(__name__, 
                         template_folder='../templates',
                         static_folder='../static')
         CORS(self.app)
         
-        # Initialize components (demo mode if dependencies not available)
-        if FULL_FUNCTIONALITY:
-            self.fibo_agent = FIBOAgent(model_path)
+        # Initialize components
+        if SIMPLE_MODE:
+            logger.info("Using simple procedural generator")
+            self.generator = SimpleGenerator()
             self.parameter_handler = ParameterHandler()
             self.post_processor = PostProcessor()
+            self.mode = "simple"
+        elif FULL_FUNCTIONALITY:
+            logger.info("Using full ML functionality")
+            self.generator = FIBOAgent(model_path)
+            self.parameter_handler = ParameterHandler()
+            self.post_processor = PostProcessor()
+            self.mode = "full"
         else:
-            logger.warning("Running in demo mode - ML dependencies not available")
-            self.fibo_agent = None
+            logger.warning("Running in demo mode - no generators available")
+            self.generator = None
             self.parameter_handler = None
             self.post_processor = None
+            self.mode = "demo"
         
         # Setup routes
         self._setup_routes()
@@ -71,14 +86,12 @@ class WebUI:
                 generate_textures = data.get('generate_textures', True)
                 texture_types = data.get('texture_types', ['albedo'])
                 
-                if not FULL_FUNCTIONALITY:
+                if self.mode == "demo":
                     # Demo mode - return mock results
                     import time
                     import random
                     
-                    # Simulate processing time
-                    time.sleep(2)
-                    
+                    time.sleep(1)
                     seed = random.randint(1000, 9999)
                     results = {
                         'success': True,
@@ -94,7 +107,7 @@ class WebUI:
                     }
                     
                     if generate_hdri:
-                        results['files']['hdri'] = f"demo_hdri_{seed}.exr"
+                        results['files']['hdri'] = f"demo_hdri_{seed}.png"
                     
                     if generate_textures:
                         results['files']['textures'] = {
@@ -107,7 +120,7 @@ class WebUI:
                     
                     return jsonify(results)
                 
-                # Full functionality mode
+                # Create master configuration
                 master_config = self.parameter_handler.create_master_config(
                     prompt=prompt,
                     ev_value=ev_value,
@@ -118,18 +131,23 @@ class WebUI:
                 results = {
                     'success': True,
                     'config': master_config,
-                    'files': {}
+                    'files': {},
+                    'mode': self.mode
                 }
                 
                 # Generate HDRI if requested
                 if generate_hdri:
-                    hdri_config = self.parameter_handler.create_hdri_config(master_config)
-                    hdri_image, hdri_metadata = self.fibo_agent.generate_hdri(hdri_config)
+                    if self.mode == "simple":
+                        hdri_config = self.parameter_handler.create_hdri_config(master_config)
+                        hdri_image, hdri_metadata = self.generator.generate_hdri(hdri_config)
+                    else:  # full mode
+                        hdri_config = self.parameter_handler.create_hdri_config(master_config)
+                        hdri_image, hdri_metadata = self.generator.generate_hdri(hdri_config)
                     
                     # Save HDRI
                     filename = f"hdri_{master_config['seed']}"
                     hdri_path = self.post_processor.process_hdri(
-                        hdri_image, hdri_metadata, filename
+                        hdri_image, hdri_metadata, filename, "png"  # Use PNG for simple mode
                     )
                     results['files']['hdri'] = hdri_path
                 
@@ -137,17 +155,17 @@ class WebUI:
                 if generate_textures:
                     texture_paths = {}
                     for texture_type in texture_types:
-                        pbr_config = self.parameter_handler.create_pbr_config(
-                            master_config, texture_type
-                        )
-                        texture_image, texture_metadata = self.fibo_agent.generate_pbr_texture(
-                            pbr_config, texture_type
-                        )
+                        if self.mode == "simple":
+                            pbr_config = self.parameter_handler.create_pbr_config(master_config, texture_type)
+                            texture_image, texture_metadata = self.generator.generate_pbr_texture(pbr_config, texture_type)
+                        else:  # full mode
+                            pbr_config = self.parameter_handler.create_pbr_config(master_config, texture_type)
+                            texture_image, texture_metadata = self.generator.generate_pbr_texture(pbr_config, texture_type)
                         
                         # Save texture
                         filename = f"{texture_type}_{master_config['seed']}"
                         texture_path = self.post_processor.process_pbr_texture(
-                            texture_image, texture_metadata, filename
+                            texture_image, texture_metadata, filename, "png"
                         )
                         texture_paths[texture_type] = texture_path
                     
@@ -249,27 +267,41 @@ class WebUI:
         @self.app.route('/api/status')
         def get_status():
             """Get system status"""
-            if not FULL_FUNCTIONALITY:
+            if self.mode == "demo":
                 return jsonify({
                     'status': 'demo_mode',
                     'model_loaded': False,
                     'device': 'cpu',
-                    'demo_mode': True,
+                    'mode': 'demo',
                     'supported_formats': {
-                        'hdri': ['exr', 'hdr', 'tiff'],
-                        'textures': ['png', 'tiff', 'jpg']
+                        'hdri': ['png', 'tiff'],
+                        'textures': ['png', 'tiff']
                     }
                 })
-            
-            return jsonify({
-                'status': 'ready',
-                'model_loaded': self.fibo_agent.pipeline is not None,
-                'device': self.fibo_agent.device,
-                'supported_formats': {
-                    'hdri': self.post_processor.hdri_formats,
-                    'textures': self.post_processor.texture_formats
-                }
-            })
+            elif self.mode == "simple":
+                return jsonify({
+                    'status': 'ready',
+                    'model_loaded': True,
+                    'device': 'cpu',
+                    'mode': 'simple',
+                    'generator': 'procedural',
+                    'supported_formats': {
+                        'hdri': ['png', 'tiff'],
+                        'textures': ['png', 'tiff']
+                    }
+                })
+            else:  # full mode
+                return jsonify({
+                    'status': 'ready',
+                    'model_loaded': hasattr(self.generator, 'pipeline') and self.generator.pipeline is not None,
+                    'device': getattr(self.generator, 'device', 'cpu'),
+                    'mode': 'full',
+                    'generator': 'ml_model',
+                    'supported_formats': {
+                        'hdri': self.post_processor.hdri_formats,
+                        'textures': self.post_processor.texture_formats
+                    }
+                })
     
     def run(self, host='0.0.0.0', port=5000, debug=False):
         """Run the Flask application"""
