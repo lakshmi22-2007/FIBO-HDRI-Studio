@@ -3,43 +3,476 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FIBO HDRI Studio</title>
+    <title>FIBO HDRI Studio - Professional 3D Asset Generation</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='48' height='48' viewBox='0 0 48 48' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='24' cy='24' r='23' fill='url(%23g1)' stroke='url(%23g2)' stroke-width='2'/%3E%3Cpath d='M24 10L34 16V28L24 34L14 28V16L24 10Z' fill='white' fill-opacity='0.95'/%3E%3Cpath d='M24 10V22M24 22L34 16M24 22L14 16' stroke='url(%23g2)' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M24 22V34M24 34L34 28M24 34L14 28' stroke='url(%23g2)' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M24 5V9M39 9L36 12M43 24H39M39 39L36 36M9 9L12 12M5 24H9M9 39L12 36' stroke='%23FFD700' stroke-width='2' stroke-linecap='round' opacity='0.7'/%3E%3Cdefs%3E%3ClinearGradient id='g1' x1='0' y1='0' x2='48' y2='48'%3E%3Cstop stop-color='%23667eea'/%3E%3Cstop offset='1' stop-color='%23764ba2'/%3E%3C/linearGradient%3E%3ClinearGradient id='g2' x1='24' y1='8' x2='24' y2='36'%3E%3Cstop stop-color='%234facfe'/%3E%3Cstop offset='1' stop-color='%2300f2fe'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-bg: #0f0f23;
+            --card-bg: #1a1a2e;
+            --card-hover: #252540;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b8;
+            --border-color: #2d2d44;
+            --accent-purple: #667eea;
+            --accent-pink: #f5576c;
+        }
+        
+        body {
+            background: #0a0a15;
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+        
         .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #1a1a2e;
             color: white;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            position: relative;
         }
+        
+        .navbar {
+            padding: 1.5rem 0;
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+            position: relative;
+        }
+        
+        .navbar-brand {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            color: white !important;
+        }
+        
+        .logo {
+            width: 44px;
+            height: 44px;
+            margin-right: 14px;
+            filter: drop-shadow(0 2px 10px rgba(255, 255, 255, 0.4));
+        }
+        
+        .navbar-text {
+            font-weight: 500;
+            font-size: 0.95rem;
+            opacity: 0.98;
+            color: white;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Add subtle background pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+        
         .card-custom {
-            border: none;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .card-custom:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px rgba(102, 126, 234, 0.2);
+        }
+        
+        .card-header {
+            background: rgba(102, 126, 234, 0.1);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem 1.5rem;
+        }
+        
+        .card-header h5, .card-header h6 {
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        
+        .card-body {
+            padding: 2rem 1.5rem;
+        }
+        
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.2px;
+        }
+        
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            color: var(--text-primary);
+        }
+        
+        .form-control::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+        
+        .form-select option {
+            background: var(--card-bg);
+            color: var(--text-primary);
+        }
+        
+        .form-text {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+        
+        .form-range {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
         }
-        .btn-custom {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            border: none;
-            border-radius: 25px;
-            padding: 10px 30px;
+        
+        .form-range::-webkit-slider-thumb {
+            background: var(--primary-gradient);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.5);
         }
+        
+        .form-range::-moz-range-thumb {
+            background: var(--accent-purple);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.5);
+            border: none;
+        }
+        
         .slider-container {
-            margin: 20px 0;
+            margin: 2rem 0;
+            padding: 1.25rem;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
         }
-        .preview-container {
-            min-height: 200px;
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            border-radius: 10px;
+        
+        .slider-value {
+            display: inline-block;
+            background: var(--primary-gradient);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-left: 0.5rem;
+        }
+        
+        .form-check {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+        
+        .form-check:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .form-check-input {
+            width: 1.25rem;
+            height: 1.25rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--accent-purple);
+            border-color: var(--accent-purple);
+        }
+        
+        .form-check-label {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-left: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .btn-custom {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 12px;
+            padding: 0.875rem 2rem;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: -0.3px;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
+            width: 100%;
         }
+        
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+            color: white;
+        }
+        
+        .btn-custom i {
+            font-size: 1.1rem;
+        }
+        
+        .preset-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        
+        .preset-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: var(--accent-purple);
+            transform: translateX(4px);
+            color: var(--text-primary);
+        }
+        
+        .preset-btn.active {
+            background: var(--primary-gradient);
+            border-color: transparent;
+            color: white;
+        }
+        
+        .preset-btn i {
+            min-width: 24px;
+        }
+        
+        .preview-container {
+            min-height: 280px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .preview-container:hover {
+            border-color: var(--accent-purple);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+        
         .generation-status {
             display: none;
         }
+        
+        .status-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.3rem;
+        }
+        
         .progress-custom {
             height: 8px;
-            border-radius: 4px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            background: var(--success-gradient);
+            transition: width 0.4s ease;
+        }
+        
+        .btn-success {
+            background: var(--success-gradient);
+            border: none;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+        
+        .btn-success:hover {
+            box-shadow: 0 6px 25px rgba(79, 172, 254, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline-success {
+            border: 1px solid var(--border-color);
+            color: #4facfe;
+            background: rgba(79, 172, 254, 0.05);
+        }
+        
+        .btn-outline-success:hover {
+            background: var(--success-gradient);
+            border-color: transparent;
+            color: white;
+        }
+        
+        .icon-large {
+            font-size: 3.5rem;
+            opacity: 0.3;
+            margin-bottom: 1rem;
+        }
+        
+        .icon-success {
+            color: #4facfe;
+        }
+        
+        .icon-primary {
+            color: var(--accent-purple);
+        }
+        
+        .badge-custom {
+            background: var(--primary-gradient);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .texture-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+        
+        .texture-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .texture-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: var(--accent-purple);
+            transform: scale(1.05);
+        }
+        
+        .texture-item i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-purple);
+        }
+        
+        #packageCard {
+            background: linear-gradient(135deg, rgba(245, 87, 108, 0.1) 0%, rgba(240, 147, 251, 0.1) 100%);
+            border: 1px solid rgba(245, 87, 108, 0.3);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @media (max-width: 768px) {
+            .card-body {
+                padding: 1.5rem 1rem;
+            }
+            
+            .slider-container {
+                margin: 1.5rem 0;
+            }
+            
+            .logo {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+            
+            .navbar-text {
+                display: none;
+            }
+        }
+        
+        /* Additional Enhancements */
+        .card-custom {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-custom::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.5), transparent);
+        }
+        
+        .form-check-label {
+            user-select: none;
+        }
+        
+        .badge-custom {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
         }
     </style>
 </head>
@@ -48,129 +481,174 @@
     <nav class="navbar navbar-expand-lg gradient-bg">
         <div class="container">
             <a class="navbar-brand fw-bold" href="#">
-                <i class="fas fa-cube me-2"></i>FIBO HDRI Studio
+                <svg class="logo" width="40" height="40" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="24" r="23" fill="url(#logo-gradient1)" stroke="url(#logo-gradient2)" stroke-width="2"/>
+                    <path d="M24 10L34 16V28L24 34L14 28V16L24 10Z" fill="white" fill-opacity="0.95"/>
+                    <path d="M24 10V22M24 22L34 16M24 22L14 16" stroke="url(#logo-gradient2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M24 22V34M24 34L34 28M24 34L14 28" stroke="url(#logo-gradient2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="24" cy="24" r="18" stroke="#FFD700" stroke-width="1" opacity="0.4" fill="none"/>
+                    <path d="M24 5V9M39 9L36 12M43 24H39M39 39L36 36M9 9L12 12M5 24H9M9 39L12 36" 
+                          stroke="#FFD700" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+                    <defs>
+                        <linearGradient id="logo-gradient1" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#667eea"/>
+                            <stop offset="1" stop-color="#764ba2"/>
+                        </linearGradient>
+                        <linearGradient id="logo-gradient2" x1="24" y1="8" x2="24" y2="36" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#4facfe"/>
+                            <stop offset="1" stop-color="#00f2fe"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                FIBO HDRI Studio
             </a>
             <div class="navbar-nav ms-auto">
                 <span class="navbar-text">
-                    Professional HDRI & PBR Generation
+                    <i class="fas fa-sparkles me-2"></i>Professional HDRI & PBR Generation
                 </span>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-4">
+    <div class="container mt-5">
         <!-- Main Interface -->
-        <div class="row">
+        <div class="row g-4">
             <!-- Control Panel -->
             <div class="col-lg-4">
-                <div class="card card-custom">
+                <div class="card card-custom animate-in">
                     <div class="card-header gradient-bg">
                         <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Generation Controls</h5>
                     </div>
                     <div class="card-body">
                         <form id="generationForm">
                             <!-- Prompt Input -->
-                            <div class="mb-3">
-                                <label for="prompt" class="form-label fw-bold">Scene Description</label>
-                                <textarea class="form-control" id="prompt" rows="3" 
-                                         placeholder="e.g., rough roman cobblestone street, weathered brick wall, wooden planks..."></textarea>
-                                <div class="form-text">Describe the material or environment you want to generate</div>
+                            <div class="mb-4">
+                                <label for="prompt" class="form-label">
+                                    <i class="fas fa-pen-fancy me-2"></i>Scene Description
+                                </label>
+                                <textarea class="form-control" id="prompt" rows="4" 
+                                         placeholder="Describe your material or environment... e.g., weathered brick wall with moss, polished marble floor, rough cobblestone street"></textarea>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>Be descriptive for best results
+                                </div>
                             </div>
 
                             <!-- EV Value Slider -->
                             <div class="slider-container">
-                                <label for="evValue" class="form-label fw-bold">
-                                    Exposure Value (EV): <span id="evValueDisplay">12.0</span>
+                                <label for="evValue" class="form-label">
+                                    <i class="fas fa-sun me-2"></i>Exposure Value
+                                    <span class="slider-value" id="evValueDisplay">12.0</span>
                                 </label>
                                 <input type="range" class="form-range" id="evValue" 
                                        min="8.0" max="15.0" step="0.1" value="12.0">
-                                <div class="d-flex justify-content-between">
-                                    <small class="text-muted">Dark/Moody</small>
-                                    <small class="text-muted">Bright/Sunny</small>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <small class="text-secondary">🌙 Dark/Moody</small>
+                                    <small class="text-secondary">☀️ Bright/Sunny</small>
                                 </div>
                             </div>
 
                             <!-- Azimuth Slider -->
                             <div class="slider-container">
-                                <label for="azimuth" class="form-label fw-bold">
-                                    Light Direction: <span id="azimuthDisplay">180°</span>
+                                <label for="azimuth" class="form-label">
+                                    <i class="fas fa-compass me-2"></i>Light Direction
+                                    <span class="slider-value" id="azimuthDisplay">180°</span>
                                 </label>
                                 <input type="range" class="form-range" id="azimuth" 
                                        min="0" max="360" step="1" value="180">
-                                <div class="d-flex justify-content-between">
-                                    <small class="text-muted">0° (North)</small>
-                                    <small class="text-muted">180° (South)</small>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <small class="text-secondary">⬆️ 0° North</small>
+                                    <small class="text-secondary">⬇️ 180° South</small>
                                 </div>
                             </div>
 
                             <!-- Color Profile -->
-                            <div class="mb-3">
-                                <label for="colorProfile" class="form-label fw-bold">Color Profile</label>
+                            <div class="mb-4">
+                                <label for="colorProfile" class="form-label">
+                                    <i class="fas fa-palette me-2"></i>Color Profile
+                                </label>
                                 <select class="form-select" id="colorProfile">
-                                    <option value="sRGB" selected>sRGB (Standard)</option>
-                                    <option value="ACEScg">ACEScg (VFX)</option>
-                                    <option value="Rec.2020">Rec.2020 (HDR)</option>
+                                    <option value="sRGB" selected>sRGB (Standard Display)</option>
+                                    <option value="ACEScg">ACEScg (VFX Pipeline)</option>
+                                    <option value="Rec.2020">Rec.2020 (HDR Display)</option>
                                     <option value="DCI-P3">DCI-P3 (Cinema)</option>
                                 </select>
                             </div>
 
                             <!-- Generation Options -->
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Generate</label>
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-cog me-2"></i>Output Options
+                                </label>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="generateHdri" checked>
                                     <label class="form-check-label" for="generateHdri">
-                                        360° HDRI Environment
+                                        <i class="fas fa-globe me-2"></i>360° HDRI Environment
                                     </label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="generateTextures" checked>
                                     <label class="form-check-label" for="generateTextures">
-                                        PBR Texture Maps
+                                        <i class="fas fa-layer-group me-2"></i>PBR Texture Maps
                                     </label>
                                 </div>
                             </div>
 
                             <!-- Texture Types -->
-                            <div class="mb-3" id="textureOptions">
-                                <label class="form-label fw-bold">Texture Types</label>
+                            <div class="mb-4" id="textureOptions">
+                                <label class="form-label">
+                                    <i class="fas fa-th me-2"></i>Texture Types
+                                </label>
                                 <div class="form-check">
                                     <input class="form-check-input texture-type" type="checkbox" value="albedo" checked>
-                                    <label class="form-check-label">Albedo (Base Color)</label>
+                                    <label class="form-check-label">
+                                        <i class="fas fa-fill-drip me-2"></i>Albedo (Base Color)
+                                    </label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input texture-type" type="checkbox" value="normal" checked>
-                                    <label class="form-check-label">Normal Map</label>
+                                    <label class="form-check-label">
+                                        <i class="fas fa-cube me-2"></i>Normal Map
+                                    </label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input texture-type" type="checkbox" value="roughness" checked>
-                                    <label class="form-check-label">Roughness Map</label>
+                                    <label class="form-check-label">
+                                        <i class="fas fa-grip-lines me-2"></i>Roughness Map
+                                    </label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input texture-type" type="checkbox" value="ao">
-                                    <label class="form-check-label">Ambient Occlusion</label>
+                                    <label class="form-check-label">
+                                        <i class="fas fa-adjust me-2"></i>Ambient Occlusion
+                                    </label>
                                 </div>
                             </div>
 
                             <!-- Preset Buttons -->
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Quick Presets</label>
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-magic me-2"></i>Quick Presets
+                                </label>
                                 <div class="d-grid gap-2">
-                                    <button type="button" class="btn btn-outline-primary btn-sm preset-btn" 
-                                            data-preset="sunny_day">☀️ Sunny Day</button>
-                                    <button type="button" class="btn btn-outline-warning btn-sm preset-btn" 
-                                            data-preset="golden_hour">🌅 Golden Hour</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm preset-btn" 
-                                            data-preset="overcast">☁️ Overcast</button>
-                                    <button type="button" class="btn btn-outline-dark btn-sm preset-btn" 
-                                            data-preset="dramatic">🎭 Dramatic</button>
+                                    <button type="button" class="btn preset-btn" data-preset="sunny_day">
+                                        <i class="fas fa-sun me-2"></i>Sunny Day
+                                    </button>
+                                    <button type="button" class="btn preset-btn" data-preset="golden_hour">
+                                        <i class="fas fa-cloud-sun me-2"></i>Golden Hour
+                                    </button>
+                                    <button type="button" class="btn preset-btn" data-preset="overcast">
+                                        <i class="fas fa-cloud me-2"></i>Overcast
+                                    </button>
+                                    <button type="button" class="btn preset-btn" data-preset="dramatic">
+                                        <i class="fas fa-bolt me-2"></i>Dramatic
+                                    </button>
                                 </div>
                             </div>
 
                             <!-- Generate Button -->
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-custom btn-lg text-white">
-                                    <i class="fas fa-magic me-2"></i>Generate Assets
+                                    <i class="fas fa-wand-magic-sparkles me-2"></i>Generate Assets
                                 </button>
                             </div>
                         </form>
@@ -181,41 +659,45 @@
             <!-- Results Panel -->
             <div class="col-lg-8">
                 <!-- Status Card -->
-                <div class="card card-custom mb-4 generation-status" id="statusCard">
+                <div class="card card-custom status-card mb-4 generation-status animate-in" id="statusCard">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
-                            <div class="spinner-border text-primary me-3" role="status">
+                            <div class="spinner-border text-primary me-4" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
-                            <div>
-                                <h6 class="mb-1">Generating Assets...</h6>
-                                <p class="mb-0 text-muted" id="statusText">Initializing FIBO model...</p>
+                            <div class="flex-grow-1">
+                                <h5 class="mb-2"><i class="fas fa-cog fa-spin me-2"></i>Generating Assets...</h5>
+                                <p class="mb-0 text-secondary" id="statusText">Initializing FIBO model...</p>
                             </div>
                         </div>
-                        <div class="progress progress-custom mt-3">
+                        <div class="progress progress-custom mt-4">
                             <div class="progress-bar" role="progressbar" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Results Grid -->
-                <div class="row" id="resultsGrid">
+                <div class="row g-4" id="resultsGrid">
                     <!-- HDRI Preview -->
-                    <div class="col-md-6 mb-4">
-                        <div class="card card-custom">
+                    <div class="col-md-6">
+                        <div class="card card-custom animate-in">
                             <div class="card-header">
-                                <h6 class="mb-0"><i class="fas fa-globe me-2"></i>HDRI Environment</h6>
+                                <h6 class="mb-0">
+                                    <i class="fas fa-globe me-2"></i>HDRI Environment
+                                    <span class="badge badge-custom float-end">360°</span>
+                                </h6>
                             </div>
                             <div class="card-body">
                                 <div class="preview-container" id="hdriPreview">
-                                    <div class="text-center text-muted">
-                                        <i class="fas fa-image fa-3x mb-2"></i>
-                                        <p>HDRI will appear here</p>
+                                    <div class="text-center text-secondary">
+                                        <i class="fas fa-image icon-large"></i>
+                                        <h6 class="mb-2">HDRI Environment</h6>
+                                        <p class="small mb-0">Your generated 360° HDRI will appear here</p>
                                     </div>
                                 </div>
                                 <div class="mt-3 d-none" id="hdriDownload">
-                                    <button class="btn btn-success btn-sm download-btn" data-type="hdri">
-                                        <i class="fas fa-download me-1"></i>Download HDRI
+                                    <button class="btn btn-success w-100 download-btn" data-type="hdri">
+                                        <i class="fas fa-download me-2"></i>Download HDRI (EXR 16-bit)
                                     </button>
                                 </div>
                             </div>
@@ -223,16 +705,20 @@
                     </div>
 
                     <!-- Texture Previews -->
-                    <div class="col-md-6 mb-4">
-                        <div class="card card-custom">
+                    <div class="col-md-6">
+                        <div class="card card-custom animate-in">
                             <div class="card-header">
-                                <h6 class="mb-0"><i class="fas fa-layer-group me-2"></i>PBR Textures</h6>
+                                <h6 class="mb-0">
+                                    <i class="fas fa-layer-group me-2"></i>PBR Texture Maps
+                                    <span class="badge badge-custom float-end">PBR</span>
+                                </h6>
                             </div>
                             <div class="card-body">
                                 <div class="preview-container" id="texturePreview">
-                                    <div class="text-center text-muted">
-                                        <i class="fas fa-th fa-3x mb-2"></i>
-                                        <p>Textures will appear here</p>
+                                    <div class="text-center text-secondary">
+                                        <i class="fas fa-th icon-large"></i>
+                                        <h6 class="mb-2">PBR Textures</h6>
+                                        <p class="small mb-0">Generated texture maps will display here</p>
                                     </div>
                                 </div>
                                 <div class="mt-3 d-none" id="textureDownloads">
@@ -241,15 +727,49 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Info Cards -->
+                    <div class="col-12">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="card card-custom text-center">
+                                    <div class="card-body py-4">
+                                        <i class="fas fa-cube icon-primary" style="font-size: 2.5rem;"></i>
+                                        <h6 class="mt-3 mb-2">Professional Quality</h6>
+                                        <p class="small text-secondary mb-0">16-bit HDRI & PBR textures</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card card-custom text-center">
+                                    <div class="card-body py-4">
+                                        <i class="fas fa-sync-alt icon-primary" style="font-size: 2.5rem;"></i>
+                                        <h6 class="mt-3 mb-2">Fully Tileable</h6>
+                                        <p class="small text-secondary mb-0">Seamless texture patterns</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card card-custom text-center">
+                                    <div class="card-body py-4">
+                                        <i class="fas fa-bolt icon-primary" style="font-size: 2.5rem;"></i>
+                                        <h6 class="mt-3 mb-2">Production Ready</h6>
+                                        <p class="small text-secondary mb-0">Blender, Unity, Unreal compatible</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Package Download -->
-                <div class="card card-custom d-none" id="packageCard">
-                    <div class="card-body text-center">
-                        <h5><i class="fas fa-box me-2"></i>Complete Asset Package</h5>
-                        <p class="text-muted">Download all generated assets in a single package</p>
-                        <button class="btn btn-custom text-white download-btn" data-type="package">
-                            <i class="fas fa-download me-2"></i>Download Package
+                <div class="card card-custom d-none mt-4 animate-in" id="packageCard">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-box-open" style="font-size: 4rem; color: var(--accent-pink); margin-bottom: 1.5rem;"></i>
+                        <h4 class="mb-3"><i class="fas fa-gift me-2"></i>Complete Asset Package</h4>
+                        <p class="text-secondary mb-4">Download all generated assets with metadata and JSON configuration</p>
+                        <button class="btn btn-custom btn-lg text-white download-btn" data-type="package">
+                            <i class="fas fa-download me-2"></i>Download Complete Package
                         </button>
                     </div>
                 </div>
@@ -257,8 +777,16 @@
         </div>
     </div>
 
+    <!-- Footer -->
+    <footer class="container text-center mt-5 mb-4">
+        <p class="text-secondary small">
+            <i class="fas fa-heart" style="color: var(--accent-pink);"></i>
+            FIBO HDRI Studio - Professional 3D Asset Generation
+        </p>
+    </footer>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="app.js"></script>
 </body>
 </html>

@@ -71,13 +71,18 @@ class FIBOStudio {
             const response = await fetch('/api/status');
             const status = await response.json();
             
-            if (status.demo_mode) {
+            console.log('Server status:', status);
+            
+            if (status.mode === 'demo' || status.status === 'demo_mode') {
                 this.showInfo('Running in demo mode - ML dependencies not installed. Interface functionality is demonstrated with mock results.');
             } else if (!status.model_loaded) {
-                this.showError('FIBO model not loaded. Please check the server logs.');
+                console.warn('FIBO model not loaded');
+            } else {
+                console.log('System ready:', status.mode);
             }
         } catch (error) {
             console.error('Failed to check status:', error);
+            this.showError('Could not connect to server. Please ensure the Flask app is running.');
         }
     }
 
@@ -108,10 +113,14 @@ class FIBOStudio {
             return;
         }
 
+        console.log('Starting generation with data:', formData);
+        
         this.showGenerationStatus();
-        this.updateProgress(0, 'Preparing generation...');
+        this.updateProgress(10, 'Preparing generation...');
 
         try {
+            this.updateProgress(30, 'Sending request to server...');
+            
             const response = await fetch('/api/generate', {
                 method: 'POST',
                 headers: {
@@ -120,16 +129,24 @@ class FIBOStudio {
                 body: JSON.stringify(formData)
             });
 
+            this.updateProgress(60, 'Processing response...');
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const result = await response.json();
+            console.log('Generation result:', result);
 
             if (result.success) {
+                this.updateProgress(90, 'Displaying results...');
                 this.currentResultId = result.result_id;
                 this.displayResults(result);
-                this.hideGenerationStatus();
+                this.updateProgress(100, 'Complete!');
+                
+                setTimeout(() => {
+                    this.hideGenerationStatus();
+                }, 500);
                 
                 if (result.demo_mode) {
                     this.showInfo('Demo generation completed! In full mode, actual HDRI and PBR files would be generated.');
@@ -176,21 +193,31 @@ class FIBOStudio {
     }
 
     displayResults(result) {
+        console.log('Displaying results:', result);
         const files = result.files;
+        console.log('Files:', files);
 
         // Display HDRI if generated
         if (files.hdri) {
+            console.log('Displaying HDRI:', files.hdri);
             this.displayHDRI(files.hdri);
+        } else {
+            console.log('No HDRI file in result');
         }
 
         // Display textures if generated
         if (files.textures) {
+            console.log('Displaying textures:', files.textures);
             this.displayTextures(files.textures);
+        } else {
+            console.log('No textures in result');
         }
 
-        // Show package download if available
-        if (files.package) {
-            document.getElementById('packageCard').classList.remove('d-none');
+        // Show package download card if any files were generated
+        if (files.hdri || files.textures) {
+            const packageCard = document.getElementById('packageCard');
+            packageCard.classList.remove('d-none');
+            packageCard.classList.add('animate-in');
         }
     }
 
@@ -198,41 +225,59 @@ class FIBOStudio {
         const preview = document.getElementById('hdriPreview');
         const download = document.getElementById('hdriDownload');
 
-        // Create preview (simplified - in real implementation, you'd show a proper HDRI preview)
+        // Create enhanced preview with animation
         preview.innerHTML = `
-            <div class="text-center">
-                <i class="fas fa-globe text-success fa-4x mb-2"></i>
-                <h6>HDRI Generated</h6>
-                <p class="text-muted small">${hdriPath.split('/').pop()}</p>
+            <div class="text-center animate-in" style="padding: 2rem;">
+                <div style="position: relative; display: inline-block;">
+                    <i class="fas fa-globe icon-success" style="font-size: 4.5rem; margin-bottom: 1rem;"></i>
+                    <i class="fas fa-check-circle" style="position: absolute; top: -5px; right: -5px; color: #00f2fe; font-size: 1.5rem; background: var(--card-bg); border-radius: 50%;"></i>
+                </div>
+                <h5 class="mb-2" style="color: #4facfe; font-weight: 700;">HDRI Generated!</h5>
+                <div class="badge badge-custom mb-2">360° Equirectangular</div>
+                <p class="text-secondary small mb-0" style="opacity: 0.7;">${hdriPath.split('/').pop()}</p>
             </div>
         `;
 
         download.classList.remove('d-none');
+        download.classList.add('animate-in');
     }
 
     displayTextures(textures) {
         const preview = document.getElementById('texturePreview');
         const downloads = document.getElementById('textureDownloads');
 
-        // Create texture grid preview
+        // Create enhanced texture grid preview
+        const textureIcons = {
+            'albedo': 'fa-fill-drip',
+            'normal': 'fa-cube',
+            'roughness': 'fa-grip-lines',
+            'ao': 'fa-adjust'
+        };
+
+        const textureColors = {
+            'albedo': '#f5576c',
+            'normal': '#4facfe',
+            'roughness': '#667eea',
+            'ao': '#764ba2'
+        };
+
         const textureGrid = Object.keys(textures).map(type => `
-            <div class="col-6 mb-2">
-                <div class="text-center p-2 border rounded">
-                    <i class="fas fa-layer-group text-primary"></i>
-                    <small class="d-block">${type.charAt(0).toUpperCase() + type.slice(1)}</small>
-                </div>
+            <div class="texture-item animate-in" style="animation-delay: ${Object.keys(textures).indexOf(type) * 0.1}s;">
+                <i class="fas ${textureIcons[type] || 'fa-layer-group'}" style="color: ${textureColors[type] || '#667eea'};"></i>
+                <div class="fw-bold mt-2">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+                <small class="text-secondary"><i class="fas fa-check-circle me-1" style="color: #00f2fe;"></i>Ready</small>
             </div>
         `).join('');
 
         preview.innerHTML = `
-            <div class="row">
+            <div class="texture-grid w-100 p-3">
                 ${textureGrid}
             </div>
         `;
 
-        // Create download buttons
+        // Create enhanced download buttons
         const downloadButtons = Object.keys(textures).map(type => `
-            <button class="btn btn-outline-success btn-sm me-2 mb-2 download-btn" data-type="${type}">
+            <button class="btn btn-outline-success btn-sm me-2 mb-2 download-btn animate-in" data-type="${type}" style="animation-delay: ${(Object.keys(textures).length + Object.keys(textures).indexOf(type)) * 0.1}s;">
                 <i class="fas fa-download me-1"></i>${type.charAt(0).toUpperCase() + type.slice(1)}
             </button>
         `).join('');
@@ -272,14 +317,39 @@ class FIBOStudio {
     }
 
     showError(message) {
-        // Simple error display - in production, use a proper toast/modal system
-        alert(`Error: ${message}`);
+        // Enhanced error display with styled alert
+        const alertHtml = `
+            <div class="alert alert-danger alert-dismissible fade show animate-in" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px; background: linear-gradient(135deg, rgba(245, 87, 108, 0.95) 0%, rgba(240, 147, 251, 0.95) 100%); border: none; box-shadow: 0 10px 40px rgba(245, 87, 108, 0.4);">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong>Error:</strong> ${message}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', alertHtml);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            const alert = document.querySelector('.alert');
+            if (alert) alert.remove();
+        }, 5000);
     }
 
     showInfo(message) {
-        // Simple info display
-        console.log(`Info: ${message}`);
-        // You could also show this in a banner on the page
+        // Enhanced info display with styled alert
+        const alertHtml = `
+            <div class="alert alert-info alert-dismissible fade show animate-in" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px; background: linear-gradient(135deg, rgba(79, 172, 254, 0.95) 0%, rgba(0, 242, 254, 0.95) 100%); border: none; box-shadow: 0 10px 40px rgba(79, 172, 254, 0.4); color: white;">
+                <i class="fas fa-info-circle me-2"></i>
+                ${message}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', alertHtml);
+        
+        // Auto-dismiss after 7 seconds
+        setTimeout(() => {
+            const alert = document.querySelector('.alert-info');
+            if (alert) alert.remove();
+        }, 7000);
     }
 }
 

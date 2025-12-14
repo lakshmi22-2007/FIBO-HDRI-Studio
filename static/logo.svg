@@ -1,0 +1,29 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle with Gradient -->
+  <circle cx="24" cy="24" r="23" fill="url(#gradient1)" stroke="url(#gradient2)" stroke-width="2"/>
+  
+  <!-- Cube Icon representing 3D -->
+  <path d="M24 10L34 16V28L24 34L14 28V16L24 10Z" fill="white" fill-opacity="0.95"/>
+  <path d="M24 10V22M24 22L34 16M24 22L14 16" stroke="url(#gradient2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M24 22V34M24 34L34 28M24 34L14 28" stroke="url(#gradient2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Light rays representing HDRI -->
+  <circle cx="24" cy="24" r="18" stroke="#FFD700" stroke-width="1" opacity="0.4" fill="none"/>
+  <path d="M24 5V9M39 9L36 12M43 24H39M39 39L36 36M9 9L12 12M5 24H9M9 39L12 36" 
+        stroke="#FFD700" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  
+  <defs>
+    <linearGradient id="gradient1" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#667eea"/>
+      <stop offset="1" stop-color="#764ba2"/>
+    </linearGradient>
+    <linearGradient id="gradient2" x1="24" y1="8" x2="24" y2="36" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4facfe"/>
+      <stop offset="1" stop-color="#00f2fe"/>
+    </linearGradient>
+  </defs>
+</svg>
+      <stop offset="1" stop-color="#00f2fe"/>
+    </linearGradient>
+  </defs>
+</svg>
