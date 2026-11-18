@@ -14,8 +14,6 @@ This agent generates matched HDRI environments and PBR texture sets from a singl
 - Deterministic control via EV values and lighting parameters
 - JSON-based repeatability for production workflows
 
-
-
 ## ✨ Key Features
 
 - 🎯 **Deterministic Generation**: Same prompt + parameters = identical results
